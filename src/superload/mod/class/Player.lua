@@ -395,6 +395,7 @@ local function getNearestHostile()
 			end
         end
     end
+	game.log("#LIGHT_RED# close_coord: "..tostring(targetdist))
 	_M.skoobot_aiNearestHostileDistance = targetdist
     return target
 end
@@ -800,9 +801,21 @@ function skoobot_act(noAction)
 			print("[Skoobot] [Combat] [Movement] Pathing towards "..targets[1].name)
 			local dir = getDirNum(game.player, targets[1])
 			local moved = false
-			
+			if not path then 
+				for ii = -1,1 do
+					for jj = -1,1 do
+						path = a:calc(game.player.x, game.player.y, targets[1].x + ii, targets[1].y + jj)
+						if path then 
+							break
+						end
+					end
+					if path then 
+						break
+					end
+				end
+			end
 			if not path then
-				--game.log("#RED#[Skoobot] [Combat] Path not found, trying beeline")
+				game.log("#RED#[Skoobot] [Combat] Path not found, trying beeline")
 				--moved = game.player:attackOrMoveDir(dir)
 				return aiStop("#RED#[Skoobot] [Combat] [Movement] AI stopped: Unable to calcuate path to nearest enemy!")
 			else
@@ -906,6 +919,13 @@ _M.playerActions = function()
 			aiStop("#RED#Player AI cancelled by wilderness zone!")
 			return ret
 		end
+		if _M.skoobot.tempPrevLoop and 
+           _M.skoobot.tempPrevLoop.x == game.player.x and 
+           _M.skoobot.tempPrevLoop.y == game.player.y and 
+		   #spotHostiles(game.player, true) == 0 then
+            aiStop("#RED#AI Stopped: Stuck in the same position!")
+            return
+        end
 		skoobot_act()
 		if _M.skoobot.tempActivation then
 			_M.skoobot.tempActivation.turnCount = _M.skoobot.tempActivation.turnCount + 1

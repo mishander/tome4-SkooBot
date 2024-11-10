@@ -98,6 +98,24 @@ function _M:use(item)
 			end )
 		game:registerDialog(d)
 		return
+	elseif item.defaultsunpaladin then 
+        local function addTalent(talentName, useType, priority)
+            for tid, _ in pairs(game.player.talents) do
+                local t = self.actor:getTalentFromId(tid)
+                if t.name == talentName then
+                    self.actor.skoobotautotalents[#self.actor.skoobotautotalents + 1] = {tid = tid, usetype = useType, priority = priority}
+                    self:generateList()
+                    return
+                end
+            end
+            print("[Skoobot] Error: Could not find talent '" .. talentName .. "'")
+        end
+
+        addTalent("Attack", "Combat", 1)
+        addTalent("Chant of Fortress", "Sustain", 1)
+		addTalent("Weapon of Light", "Sustain", 1)
+		addTalent("Sun Ray", "Combat", 10)
+		addTalent("Rune: Shielding", "DamagePrevention", 100)
 	else
 		local d = CustomActionDialog.new("Modify Talent Use: "..item.name, {
 			{name="Select Use Type",action=function(value)
@@ -152,7 +170,23 @@ function _M:generateList()
 		end
 	end
 	
-	list[#list+1] = {id=#list+1, name="#GOLD#Add a new talent...", desc="Select this option to add a new skill to SkooBot's repertoire.", usetype="", priority="", addnew=true}
+    list[#list + 1] = {
+        id = #list + 1,
+        name = "#GOLD#Add a new talent...",
+        desc = "Select this option to add a new skill to SkooBot's repertoire.",
+        usetype = "",
+        priority = "",
+        addnew = true
+    }
+
+    list[#list + 1] = {
+        id = #list + 1,
+        name = "#GOLD#Put defaults for Sun Paladin",
+        desc = "Adds default talents for a Sun Paladin.",
+        usetype = "",
+        priority = "",
+        defaultsunpaladin = true
+    }
 
 	local chars = {}
 	for i, v in ipairs(list) do
