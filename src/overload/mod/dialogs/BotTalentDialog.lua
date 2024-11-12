@@ -81,7 +81,7 @@ function _M:use(item)
 				self.actor.skoobotautotalents[#self.actor.skoobotautotalents+1] = {tid=value, usetype='', priority=1}
 				-- todo prompt user for usetype and priority
 				self:generateList()
-				local d = PickOneDialog.new("Pick use type for "..self.actor:getTalentFromId(value).name:capitalize(), 
+				local d = PickOneDialog.new("Pick use type for "..self.actor:getTalentFromId(value).name:capitalize(),
 					{{name='Combat',value='Combat'},{name='Sustain',value='Sustain'},
 						{name='Recovery',value='Recovery'},{name='Damage Prevention',value='DamagePrevention'}},
 					function(value2)
@@ -98,8 +98,20 @@ function _M:use(item)
 			end )
 		game:registerDialog(d)
 		return
-	elseif item.defaultsunpaladin then 
-        local function addTalent(talentName, useType, priority)
+	elseif item.defaultsunpaladin then
+		local function addTalent(talentName, useType, priority)
+		  -- Check if the talent is already in the list by name
+		  local alreadyAdded = false
+		  for _, existingTalent in ipairs(self.actor.skoobotautotalents) do
+			if self.actor:getTalentFromId(existingTalent.tid).name == talentName then
+			  alreadyAdded = true
+			  break
+			end
+		  end
+
+		  -- Only add the talent if it's not already in the list
+		  if not alreadyAdded then
+			-- Iterate through all talents in the database to find the ID
             for tid, _ in pairs(game.player.talents) do
                 local t = self.actor:getTalentFromId(tid)
                 if t.name == talentName then
@@ -109,17 +121,29 @@ function _M:use(item)
                 end
             end
             print("[Skoobot] Error: Could not find talent '" .. talentName .. "'")
-        end
+		  end
+		end
 
-        addTalent("Attack", "Combat", 1)
-        addTalent("Chant of Fortress", "Sustain", 1)
+		addTalent("Attack", "Combat", 1)
+		addTalent("Chant of Fortress", "Sustain", 1)
 		addTalent("Weapon of Light", "Sustain", 1)
 		addTalent("Sun Ray", "Combat", 10)
+		addTalent("Infusion: Regeneration", "DamagePrevention", 1000)
 		addTalent("Rune: Shielding", "DamagePrevention", 100)
+		addTalent("Shield Pummel", "Combat", 1000)
+		addTalent("Stunning Blow", "Combat", 5000)
+		addTalent("Execution", "Combat", 4)
+		addTalent("Weapon of Wrath", "Sustain", 1)
+		addTalent("Block", "Combat", 100)
+		addTalent("Death Dance", "Combat", 101)
+		addTalent("Shield Slam", "Combat", 600)
+		addTalent("Second Life", "Sustain", 1)
+		addTalent("Wave of Power", "Combat", 11)
+		addTalent("Assault", "Combat", 6000)
 	else
 		local d = CustomActionDialog.new("Modify Talent Use: "..item.name, {
 			{name="Select Use Type",action=function(value)
-				local d = PickOneDialog.new("Pick use type for "..item.name, 
+				local d = PickOneDialog.new("Pick use type for "..item.name,
 					{{name='Combat',value='Combat'},{name='Sustain',value='Sustain'},
 						{name='Recovery',value='Recovery'},{name='Damage Prevention',value='DamagePrevention'}},
 					function(value)
